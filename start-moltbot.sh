@@ -208,6 +208,13 @@ if (process.env.SLACK_BOT_TOKEN && process.env.SLACK_APP_TOKEN) {
     config.channels.slack.enabled = true;
 }
 
+// WhatsApp configuration (uses Baileys/WhatsApp Web, no bot token needed)
+if (process.env.WHATSAPP_DM_POLICY) {
+    config.channels.whatsapp = config.channels.whatsapp || {};
+    config.channels.whatsapp.enabled = true;
+    config.channels.whatsapp.dmPolicy = process.env.WHATSAPP_DM_POLICY;
+}
+
 // Base URL override (e.g., for Cloudflare AI Gateway)
 // Usage: Set AI_GATEWAY_BASE_URL or ANTHROPIC_BASE_URL to your endpoint like:
 //   https://gateway.ai.cloudflare.com/v1/{account_id}/{gateway_id}/anthropic
@@ -260,9 +267,20 @@ if (isOpenAI) {
     config.agents.defaults.models['anthropic/claude-sonnet-4-5-20250929'] = { alias: 'Sonnet 4.5' };
     config.agents.defaults.models['anthropic/claude-haiku-4-5-20251001'] = { alias: 'Haiku 4.5' };
     config.agents.defaults.model.primary = 'anthropic/claude-opus-4-5-20251101';
+} else if (process.env.GOOGLE_API_KEY && !process.env.ANTHROPIC_API_KEY) {
+    // Google Gemini as primary (no Anthropic key set)
+    console.log('Configuring Google Gemini as primary model');
+    config.agents.defaults.model.primary = 'google/gemini-3-pro-preview';
 } else {
     // Default to Anthropic without custom base URL (uses built-in pi-ai catalog)
     config.agents.defaults.model.primary = 'anthropic/claude-opus-4-5';
+}
+
+// If both Anthropic and Google keys are set, add Gemini as an available model
+if (process.env.GOOGLE_API_KEY && process.env.ANTHROPIC_API_KEY) {
+    console.log('Adding Google Gemini as additional model');
+    config.agents.defaults.models = config.agents.defaults.models || {};
+    config.agents.defaults.models['google/gemini-3-pro-preview'] = { alias: 'Gemini' };
 }
 
 // Write updated config

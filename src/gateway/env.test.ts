@@ -121,6 +121,18 @@ describe('buildEnvVars', () => {
     expect(result.CLAWDBOT_BIND_MODE).toBe('lan');
   });
 
+  it('includes WHATSAPP_DM_POLICY when set', () => {
+    const env = createMockEnv({ WHATSAPP_DM_POLICY: 'pairing' });
+    const result = buildEnvVars(env);
+    expect(result.WHATSAPP_DM_POLICY).toBe('pairing');
+  });
+
+  it('includes GOOGLE_API_KEY when set', () => {
+    const env = createMockEnv({ GOOGLE_API_KEY: 'google-key' });
+    const result = buildEnvVars(env);
+    expect(result.GOOGLE_API_KEY).toBe('google-key');
+  });
+
   it('combines all env vars correctly', () => {
     const env = createMockEnv({
       ANTHROPIC_API_KEY: 'sk-key',
